@@ -8,7 +8,7 @@ dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173" || "https://web-mail-two.vercel.app",  
+  origin: "http://localhost:5173" && "https://web-mail-two.vercel.app",  
   methods: "GET,POST,OPTIONS",
   allowedHeaders: "Content-Type,Authorization"
 }));
