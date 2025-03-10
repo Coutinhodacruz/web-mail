@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.1",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",
@@ -20,6 +21,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "nodemailer": "^6.10.0",
+    "nodemon": "^3.1.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.3",
