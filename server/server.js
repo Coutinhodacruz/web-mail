@@ -12,7 +12,7 @@ app.use(
     origin: function (origin, callback) {
       const allowedOrigins = [
         "http://localhost:5173",
-        "https://web-mail-two.vercel.app",
+        'https://web-mail-lovat.vercel.app',
         "https://serviceconect.com",
         "http://centraconect.com/"
       ];

