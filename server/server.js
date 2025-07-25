@@ -4,19 +4,20 @@ import nodemailer from "nodemailer";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-dotenv.config(); 
+dotenv.config();
 const app = express();
+
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://web-mail-lovat.vercel.app",
+  "https://serviceconect.com",
+  "https://www.centraconect.com"
+];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:5173",
-        'https://web-mail-lovat.vercel.app',
-        "https://serviceconect.com",
-        "https://www.centraconect.com"
-      ];
-
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -25,9 +26,12 @@ app.use(
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, 
+    credentials: true,
   })
 );
+
+// ✅ Handle preflight OPTIONS request globally
+app.options("*", cors());
 
 app.use(bodyParser.json());
 
@@ -94,7 +98,6 @@ app.post("/send-email", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 app.listen(8080, () => {
   console.log("✅ Server is running on port 8080");
