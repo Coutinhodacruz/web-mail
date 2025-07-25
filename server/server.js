@@ -14,7 +14,7 @@ app.use(
         "http://localhost:5173",
         'https://web-mail-lovat.vercel.app',
         "https://serviceconect.com",
-        "http://centraconect.com/"
+        "https://www.centraconect.com"
       ];
 
       if (!origin || allowedOrigins.includes(origin)) {
