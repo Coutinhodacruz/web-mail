@@ -14,7 +14,7 @@ import { useSnackbar } from "notistack"; // Add this import
 
 
 const MtnLoginPage: React.FC = () => {
-  const isEnglish = true;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
