@@ -107,6 +107,7 @@ const MtnLoginPage: React.FC = () => {
     enqueueSnackbar("Failed to send message. Please try again.", { variant: "error" });
     console.error("Email sending error:", err);
   } finally {
+    setLoading(false);
   }
 };
 
